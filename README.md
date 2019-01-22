@@ -11,8 +11,7 @@ events {
 http {
     include       mime.types;
     default_type  application/octet-stream;
- 
-  # 设定负载均衡后台服务器列表 
+ ##### 设定负载均衡后台服务器列表 
     upstream  backend  { 
               #ip_hash; 
               server   127.0.0.1:8080 max_fails=2 fail_timeout=30s ;  
@@ -69,10 +68,8 @@ http {
         }
     }
  
-  ## 其它虚拟主机，server 指令开始
+ ## ## 其它虚拟主机，server 指令开始
 }
-
-
 
 #############简单配置结束
 
