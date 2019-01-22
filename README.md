@@ -1,6 +1,8 @@
 本demo
 是给初学者学习nginx 的一个简单地学习案例。
 首先我的这个小demo的简单配置： 
+
+
 #############简单配置开始
 events {
   worker_connections  1024;  ## Default: 1024
