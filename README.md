@@ -1,6 +1,89 @@
 本demo
 是给初学者学习nginx 的一个简单地学习案例。
+首先我的这个小demo的简单配置： 
+#############简单配置开始
+events {
+  worker_connections  1024;  ## Default: 1024
+}
+
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+ 
+  # 设定负载均衡后台服务器列表 
+    upstream  backend  { 
+              #ip_hash; 
+              server   127.0.0.1:8080 max_fails=2 fail_timeout=30s ;  
+              server   127.0.0.1:8090 max_fails=2 fail_timeout=30s ;  
+    }
+ 
+  # 很重要的虚拟主机配置
+    server {
+        listen       8889;
+        server_name  itoatest.example.com;
+        root   /apps/oaapp;
+        #对 / 所有做负载均衡+反向代理
+        location / {
+            root   /apps/oaapp;
+            index  index.jsp index.html index.htm;
+ 
+            proxy_pass        http://backend;  
+            proxy_redirect off;
+            # 后端的Web服务器可以通过X-Forwarded-For获取用户真实IP
+            proxy_set_header  Host  $host;
+            proxy_set_header  X-Real-IP  $remote_addr;  
+            proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for;
+            proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+ 
+        }
+ 
+        #静态文件，nginx自己处理，不去backend请求tomcat
+        location  ~* /download/ {  
+            root /apps/oa/fs;  
+ 
+        }
+        location ~ .*\.(gif|jpg|jpeg|bmp|png|ico|txt|js|css)$   
+        {   
+            root /apps/oaapp;   
+            expires      7d; 
+        }
+        location /nginx_status {
+            stub_status on;
+            access_log off;
+            allow 192.168.10.0/24;
+            deny all;
+        }
+ 
+        location ~ ^/(WEB-INF)/ {   
+            deny all;   
+        }
+        #error_page  404              /404.html;
+ 
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+ 
+  ## 其它虚拟主机，server 指令开始
+}
+
+
+
+#############简单配置结束
+
+下面是详细的各种配置得详细说明：
+
+
 下面是具体的nginx.conf 这个配置文件的详细解读
+
+
+
+
 #运行用户
 user nobody;
 #启动进程,通常设置成和cpu的数量相等
